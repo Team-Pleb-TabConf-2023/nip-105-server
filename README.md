@@ -4,6 +4,8 @@ In this repo you can run and test an implementation of [NIP-103 - API Service Ma
 
 This project was created for the TABconf 2023 hackathon. 
 
+[Presentation Slides](./data-buffet-presentation.pdf)
+
 ## Getting it running
 
 First you will need to copy the example env file and fill out the missing fields with your own keys:
