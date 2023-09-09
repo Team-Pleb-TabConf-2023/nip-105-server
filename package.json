@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "axios": "^1.5.0",
+    "body-parser": "^1.20.2",
+    "bolt11": "^1.4.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "nostr-tools": "^1.14.2",
+    "websocket-polyfill": "^0.0.3",
+    "ws": "^8.14.0"
+  },
+  "scripts": {
+    "start-server": "node server.js",
+    "start-client": "node client.js"
+  }
+}
