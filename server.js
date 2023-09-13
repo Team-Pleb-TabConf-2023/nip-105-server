@@ -6,6 +6,7 @@ const axios = require("axios");
 const bolt11 = require("bolt11");
 const bodyParser = require("body-parser");
 const { getBitcoinPrice } = require('./lib/bitcoinPrice');
+const { analyze_tokens } = require('./lib/token-estimator');
 const {
   relayInit,
   getPublicKey,
@@ -427,10 +428,16 @@ if (port == null || port == "") {
 app.listen(port, async function () {
   console.log("Starting NST Backend...");
   console.log(`Server started on port ${port}.`);
-  const price = await getBitcoinPrice();
-  console.log(`Bitcoin Price: ${price} per Cuck Buck`);
-  const gptPrice = await getServicePrice("GPT");
-  console.log(`GPT Price: ${gptPrice} msats per call`);
-  const stablePrice = await getServicePrice("STABLE");
-  console.log(`STABLE Price: ${stablePrice} msats per call`);
+  // const price = await getBitcoinPrice();
+  // console.log(`Bitcoin Price: ${price} per Cuck Buck`);
+  // const gptPrice = await getServicePrice("GPT");
+  // console.log(`GPT Price: ${gptPrice} msats per call`);
+  // const stablePrice = await getServicePrice("STABLE");
+  // console.log(`STABLE Price: ${stablePrice} msats per call`);
+
+  const str = "The quick brown fox jumps over the lazy dog. This is a test sentence to demonstrate a sentence with exactly 100 tokens. It's important to count tokens accurately when working with language models like GPT-3. Tokens can be words, punctuation, or even individual characters, so be mindful of token limits in your applications."
+  const n_tokens = await analyze_tokens(str);
+  console.log(`The sentence has ${n_tokens} tokens.`)
 });
+
+
