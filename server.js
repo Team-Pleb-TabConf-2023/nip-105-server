@@ -5,6 +5,7 @@ const app = express();
 const axios = require("axios");
 const bolt11 = require("bolt11");
 const bodyParser = require("body-parser");
+const { getBitcoinPrice } = require('./lib/bitcoinPrice');
 const {
   relayInit,
   getPublicKey,
@@ -253,12 +254,14 @@ app.get("/:service/:payment_hash/check_payment", async (req, res) => {
 
 // --------------------- SERVICES -----------------------------
 
-function getServicePrice(service) {
+async function getServicePrice(service) {
+  const bitcoinPrice = await getBitcoinPrice(); 
+  const profitMarginFactor = (1.0 + (process.env.PROFIT_MARGIN_PCT/100.0));
   switch (service) {
     case "GPT":
-      return process.env.GPT_MSATS;
+      return Math.round((process.env.GPT_USD * 100000000000 * profitMarginFactor) / bitcoinPrice);
     case "STABLE":
-      return process.env.STABLE_DIFFUSION_MSATS;
+      return Math.round((process.env.STABLE_DIFFUSION_USD * 100000000000 * profitMarginFactor) / bitcoinPrice);
     default:
       return process.env.GPT_MSATS;
   }
@@ -421,7 +424,13 @@ if (port == null || port == "") {
   port = 3000;
 }
 
-app.listen(port, function () {
+app.listen(port, async function () {
   console.log("Starting NST Backend...");
   console.log(`Server started on port ${port}.`);
+  const price = await getBitcoinPrice();
+  console.log(`Bitcoin Price: ${price} per Cuck Buck`);
+  const gptPrice = await getServicePrice("GPT");
+  console.log(`GPT Price: ${gptPrice} msats per call`);
+  const stablePrice = await getServicePrice("STABLE");
+  console.log(`STABLE Price: ${stablePrice} msats per call`);
 });
