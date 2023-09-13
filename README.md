@@ -1,6 +1,6 @@
 # Data Buffet Example
 
-In this repo you can run and test an implementation of [NIP-103 - API Service Marketplace](./103.md). The idea is simple, service providers post their API offerings in a `kind:31402` then clients can search for and consume them for lightning. 
+In this repo you can run and test an implementation of [NIP-105 - API Service Marketplace](./105.md). The idea is simple, service providers post their API offerings in a `kind:31402` then clients can search for and consume them for lightning. 
 
 This project was created for the TABconf 2023 hackathon. 
 
