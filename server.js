@@ -435,9 +435,9 @@ app.listen(port, async function () {
   // const stablePrice = await getServicePrice("STABLE");
   // console.log(`STABLE Price: ${stablePrice} msats per call`);
 
-  const str = "The quick brown fox jumps over the lazy dog. This is a test sentence to demonstrate a sentence with exactly 100 tokens. It's important to count tokens accurately when working with language models like GPT-3. Tokens can be words, punctuation, or even individual characters, so be mindful of token limits in your applications."
+  const str = "The quick brown fox jumps over the lazy dog. This is a test sentence to demonstrate a sentence with exactly 100 tokens. It's important to count tokens accurately when working with language models like GPT-3. Tokens can be words, punctuation, or even individual characters, so be mindful of token limits in your applications. What a crazy proposition. You can actually charge people based on exactly how much semantic information their request contains! It is of paramount importance to correctly estimate the size if you want profits"
   const n_tokens = await analyze_tokens(str);
-  console.log(`The sentence has ${n_tokens} tokens.`)
+  console.log(`The string has ${n_tokens} tokens.`)
 });
 
 
