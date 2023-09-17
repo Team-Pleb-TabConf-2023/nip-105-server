@@ -254,14 +254,19 @@ app.get("/:service/:payment_hash/check_payment", async (req, res) => {
 
 // --------------------- SERVICES -----------------------------
 
+function usd_to_millisats(servicePriceUSD,bitcoinPrice){
+  const profitMarginFactor = (1.0 + (process.env.PROFIT_MARGIN_PCT/100.0));
+  return Math.round((servicePriceUSD * 100000000000 * profitMarginFactor) / bitcoinPrice);
+}
+
 async function getServicePrice(service) {
   const bitcoinPrice = await getBitcoinPrice(); 
-  const profitMarginFactor = (1.0 + (process.env.PROFIT_MARGIN_PCT/100.0));
+  
   switch (service) {
     case "GPT":
-      return Math.round((process.env.GPT_USD * 100000000000 * profitMarginFactor) / bitcoinPrice);
+      return usd_to_millisats(process.env.GPT_USD,bitcoinPrice);
     case "STABLE":
-      return Math.round((process.env.STABLE_DIFFUSION_USD * 100000000000 * profitMarginFactor) / bitcoinPrice);
+      return usd_to_millisats(process.env.STABLE_DIFFUSION_USD,bitcoinPrice);
     default:
       return process.env.GPT_MSATS;
   }
@@ -425,12 +430,6 @@ if (port == null || port == "") {
 }
 
 app.listen(port, async function () {
-  console.log("Starting NST Backend...");
+  console.log("Starting NIP105 Server...");
   console.log(`Server started on port ${port}.`);
-  const price = await getBitcoinPrice();
-  console.log(`Bitcoin Price: ${price} per Cuck Buck`);
-  const gptPrice = await getServicePrice("GPT");
-  console.log(`GPT Price: ${gptPrice} msats per call`);
-  const stablePrice = await getServicePrice("STABLE");
-  console.log(`STABLE Price: ${stablePrice} msats per call`);
 });
