@@ -435,7 +435,31 @@ app.listen(port, async function () {
   // const stablePrice = await getServicePrice("STABLE");
   // console.log(`STABLE Price: ${stablePrice} msats per call`);
 
-  const str = "The quick brown fox jumps over the lazy dog. This is a test sentence to demonstrate a sentence with exactly 100 tokens. It's important to count tokens accurately when working with language models like GPT-3. Tokens can be words, punctuation, or even individual characters, so be mindful of token limits in your applications. What a crazy proposition. You can actually charge people based on exactly how much semantic information their request contains! It is of paramount importance to correctly estimate the size if you want profits"
+  //const str = "The quick brown fox jumps over the lazy dog. This is a test sentence to demonstrate a sentence with exactly 100 tokens. It's important to count tokens accurately when working with language models like GPT-3. Tokens can be words, punctuation, or even individual characters, so be mindful of token limits in your applications. What a crazy proposition. You can actually charge people based on exactly how much semantic information their request contains! It is of paramount importance to correctly estimate the size if you want profits"
+  const str = `Once upon a time, in a kingdom far, far away, there lived a courageous princess named Isabella. Isabella was known throughout the land for her beauty, intelligence, and unwavering kindness. But little did the people of the kingdom know that beneath her graceful exterior, Isabella possessed a heart full of adventure and a thirst for the unknown.
+
+One sunny morning, as the golden rays of the sun danced across the emerald meadows of the kingdom, Isabella received a mysterious letter. The letter, sealed with a wax emblem of a fearsome dragon, bore news of a perilous threat. A colossal dragon named Drakar had awakened from its slumber deep within the Misty Mountains, and it was now terrorizing the neighboring lands.
+
+Without hesitation, Princess Isabella donned her armor, mounted her trusty steed, Seraphina, and set forth on a journey to confront the dragon. Her determination to protect her kingdom and its people burned like a fiery beacon in her heart.
+
+Days turned into weeks as Isabella ventured deeper into the rugged terrain of the Misty Mountains. The air grew colder, and the dense fog obscured her path. Yet, Isabella pressed on, guided only by her unwavering resolve and the legends passed down through generations.
+
+Finally, on the edge of a precipice shrouded in mist, she laid eyes upon the imposing figure of Drakar. With scales as dark as midnight and eyes that glowed like burning coals, the dragon was a formidable adversary. But Isabella's bravery knew no bounds.
+
+She unsheathed her gleaming sword and shouted, "Oh, mighty Drakar, I come not to destroy you but to seek understanding and peace between our worlds. What has driven you to such acts of terror?"
+
+To her surprise, Drakar's deep voice resonated through the mist, "Princess Isabella, you are unlike any human I have encountered. Long have I slumbered in solitude, guarding the ancient treasures of these mountains. It was fear and ignorance that led your people to believe I was a threat."
+
+Isabella listened attentively as Drakar recounted his story. He spoke of a time when humans and dragons coexisted harmoniously, sharing knowledge and wisdom. But as time passed, greed and misunderstanding drove a wedge between the two races.
+
+With empathy in her heart, Isabella vowed to mend the broken bonds between humans and dragons. She returned to her kingdom with Drakar as her ally, carrying a message of peace and reconciliation.
+
+Through her wisdom and compassion, Princess Isabella brought about a new era of cooperation between humans and dragons. The kingdom flourished as it had never before, and the Misty Mountains once again became a place of wonder and discovery.
+
+And so, the courageous princess and the once-feared dragon became symbols of unity and understanding, proving that even the most daunting challenges could be overcome with a heart full of compassion.
+
+The end.`;
+
   const n_tokens = await analyze_tokens(str);
   console.log(`The string has ${n_tokens} tokens.`)
 });
