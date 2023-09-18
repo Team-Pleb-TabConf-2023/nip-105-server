@@ -424,6 +424,8 @@ async function postOfferings() {
 }
 
 postOfferings();
+setInterval(postOfferings, 300000);
+
 
 // --------------------- SERVER -----------------------------
 
