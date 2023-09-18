@@ -126,7 +126,7 @@ async function getPaymentHash(invoice) {
 }
 
 async function generateInvoice(service) {
-  const msats = getServicePrice(service);
+  const msats = await getServicePrice(service);
   const lnurlResponse = await axios.get(getLNURL(), {
     headers: {
       Accept: "application/json",
