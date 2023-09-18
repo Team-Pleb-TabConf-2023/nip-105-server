@@ -387,11 +387,13 @@ async function postOfferings() {
   });
   await relay.connect();
 
+  const gptPrice = await getServicePrice("GPT")
+
   const gptOffering = createOfferingNote(
     pk,
     sk,
     "https://api.openai.com/v1/chat/completions",
-    Number(getServicePrice("GPT")),
+    Number(gptPrice),
     process.env.ENDPOINT + "/" + "GPT",
     "UP",
     GPT_SCHEMA,
@@ -402,11 +404,12 @@ async function postOfferings() {
   await relay.publish(gptOffering);
   console.log(`Published GPT Offering: ${gptOffering.id}`);
 
+  const stablePrice = await getServicePrice("STABLE")
   const sdOffering = createOfferingNote(
     pk,
     sk,
     "https://stablediffusionapi.com/api/v4/dreambooth",
-    Number(getServicePrice("STABLE")),
+    Number(stablePrice),
     process.env.ENDPOINT + "/" + "STABLE",
     "UP",
     STABLE_DIFFUSION_SCHEMA,
