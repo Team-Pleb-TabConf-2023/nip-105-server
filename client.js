@@ -21,6 +21,7 @@ function getLatestEventByService(events, desiredService) {
 async function pollUrl(url, runs, delay) {
   for (let i = 0; i < runs; i++) {
     try {
+      console.log(`Polling url:${url}`)
       const response = await axios.get(url);
 
       if (response.status == 202) {

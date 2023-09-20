@@ -162,7 +162,7 @@ async function generateInvoice(service) {
 function getSuccessAction(service, paymentHash) {
   return {
     tag: "url",
-    url: `http://localhost:3000/${service}/${paymentHash}/get_result`,
+    url: `${process.env.ENDPOINT}/${service}/${paymentHash}/get_result`,
     description: "Open to get the confirmation code for your purchase.",
   };
 }
