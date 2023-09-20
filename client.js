@@ -249,27 +249,27 @@ async function main() {
 
   // --------------------- Call Endpoints -----------------------------
   //Ex 1: Simple GPT Examples:
-  // const runs = 3;
-  // const gptRuns = [];
-  // for (let i = 0; i < runs; i++) {
-  //   gptRuns.push(runGPT(relay, i, `Tell me a joke about the number ${i}`));
-  // }
-  // await Promise.all(gptRuns);
+  const runs = 3;
+  const gptRuns = [];
+  for (let i = 0; i < runs; i++) {
+    gptRuns.push(runGPT(relay, i, `Tell me a joke about the number ${i}`));
+  }
+  await Promise.all(gptRuns);
 
   //Ex 2: StableDiffusion Example:
   //await runStableDiffusion(relay, 0, "Cypherpunk girl with purple hair", "sdxl");
   
   //Ex 3: Chained Requests from disparate services:
   // Call runGPT to get a GPT response
-  const countries = ["Japan", "Madagascar", "Sweden", "Austrailia", "Brazil"];
+  // const countries = ["Japan", "Madagascar", "Sweden", "Austrailia", "Brazil"];
 
-  for (let i = 0; i < countries.length; i++) {
-    const country = countries[i];
-    const gptResponse = await runGPT(relay, i, `Write me a prompt for a text to image model that will make a picturesque landscape of ${country} that someone would hang on the wall.`);
+  // for (let i = 0; i < countries.length; i++) {
+  //   const country = countries[i];
+  //   const gptResponse = await runGPT(relay, i, `Write me a prompt for a text to image model that will make a picturesque landscape of ${country} that someone would hang on the wall.`);
 
-    // Use the GPT response as the prompt for runStableDiffusion
-    const sdResponse = await runStableDiffusion(relay, i, gptResponse, "dream-shaper-8797");
-  }
+  //   // Use the GPT response as the prompt for runStableDiffusion
+  //   const sdResponse = await runStableDiffusion(relay, i, gptResponse, "dream-shaper-8797");
+  // }
 
 
   // --------------------- Clean Up -----------------------------
