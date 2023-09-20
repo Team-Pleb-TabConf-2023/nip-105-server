@@ -40,6 +40,45 @@ async function pollUrl(url, runs, delay) {
   }
 }
 
+async function respondToPaymentRequest(prData){
+  var response = null;
+  switch(process.env.PAYMENT_METHOD){
+  case "alby":
+      console.log(`paying from alby: Bearer ${process.env.ALBY_WALLET_API}`)
+      response = await axios.post(
+      "https://api.getalby.com/payments/bolt11",
+      {
+        //out: true,
+        invoice: prData.pr,
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${process.env.ALBY_WALLET_API}`,
+          "Content-type": "application/json",
+        },
+      }
+    );
+      return response;
+    break
+  case "lnbits":
+      response = await axios.post(
+      "https://legend.lnbits.com/api/v1/payments",
+      {
+        out: true,
+        bolt11: prData.pr,
+      },
+      {
+        headers: {
+          "X-Api-Key": process.env.LNBITS_API,
+          "Content-type": "application/json",
+        },
+      }
+    );
+      return response;
+    break
+  }
+}
+
 // ----------------- GPT ---------------------------
 
 function parseGPTResponse(response) {
@@ -101,21 +140,7 @@ async function runGPT(relay, index, question) {
     console.log(`------- PAYING GPT ${index} --------`);
     console.log(responseData.pr);
     console.log("----------------------------");
-
-    const response = await axios.post(
-      "https://legend.lnbits.com/api/v1/payments",
-      {
-        out: true,
-        bolt11: responseData.pr,
-      },
-      {
-        headers: {
-          "X-Api-Key": process.env.LNBITS_API,
-          "Content-type": "application/json",
-        },
-      }
-    );
-
+    const response = await respondToPaymentRequest(responseData);
     console.log("------- PAID GPT ---------------");
     console.log(response.data);
     console.log("----------------------------");
@@ -201,21 +226,7 @@ async function runStableDiffusion(relay, index, prompt, model) {
     console.log(`------- PAYING SD ${index} --------`);
     console.log(responseData.pr);
     console.log("----------------------------");
-
-    const response = await axios.post(
-      "https://legend.lnbits.com/api/v1/payments",
-      {
-        out: true,
-        bolt11: responseData.pr,
-      },
-      {
-        headers: {
-          "X-Api-Key": process.env.LNBITS_API,
-          "Content-type": "application/json",
-        },
-      }
-    );
-
+    const response = await respondToPaymentRequest(responseData);
     console.log("------- PAID SD ---------------");
     console.log(response.data);
     console.log("----------------------------");
@@ -250,27 +261,27 @@ async function main() {
 
   // --------------------- Call Endpoints -----------------------------
   //Ex 1: Simple GPT Examples:
-  const runs = 1;
-  const gptRuns = [];
-  for (let i = 0; i < runs; i++) {
-    gptRuns.push(runGPT(relay, i, `Tell me a joke about the number ${i}`));
-  }
-  await Promise.all(gptRuns);
+  // const runs = 3;
+  // const gptRuns = [];
+  // for (let i = 0; i < runs; i++) {
+  //   gptRuns.push(runGPT(relay, i, `Tell me a joke about the number ${i}`));
+  // }
+  // await Promise.all(gptRuns);
 
   //Ex 2: StableDiffusion Example:
-  //await runStableDiffusion(relay, 0, "Cypherpunk girl with purple hair", "sdxl");
+  // await runStableDiffusion(relay, 0, "Cypherpunk girl with purple hair", "sdxl");
   
   //Ex 3: Chained Requests from disparate services:
   // Call runGPT to get a GPT response
-  // const countries = ["Japan", "Madagascar", "Sweden", "Austrailia", "Brazil"];
+  const countries = ["Japan","Sweden"];//["Japan", "Madagascar", "Sweden", "Austrailia", "Brazil"];
 
-  // for (let i = 0; i < countries.length; i++) {
-  //   const country = countries[i];
-  //   const gptResponse = await runGPT(relay, i, `Write me a prompt for a text to image model that will make a picturesque landscape of ${country} that someone would hang on the wall.`);
+  for (let i = 0; i < countries.length; i++) {
+    const country = countries[i];
+    const gptResponse = await runGPT(relay, i, `Write me a prompt for a text to image model that will make a picturesque landscape of ${country} that someone would hang on the wall.`);
 
-  //   // Use the GPT response as the prompt for runStableDiffusion
-  //   const sdResponse = await runStableDiffusion(relay, i, gptResponse, "dream-shaper-8797");
-  // }
+    // Use the GPT response as the prompt for runStableDiffusion
+    const sdResponse = await runStableDiffusion(relay, i, gptResponse, "dream-shaper-8797");
+  }
 
 
   // --------------------- Clean Up -----------------------------
