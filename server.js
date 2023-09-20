@@ -221,15 +221,18 @@ app.get("/:service/:payment_hash/get_result", async (req, res) => {
             .then(async (response) => {
               doc.requestResponse = response;
               doc.state = "DONE";
+              console.log(`submitService .then branch. Doc:${doc}`)
               await doc.save();
             })
             .catch(async (e) => {
               doc.requestResponse = e;
               doc.state = "ERROR";
+              console.log(`submitService .catch branch. Doc:${doc}, error:${e}`)
               await doc.save();
             });
 
           doc.state = "WORKING";
+          console.log(`L235 Doc:${doc}`)
           await doc.save();
           res.status(202).send({ state: doc.state });
       }
