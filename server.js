@@ -254,9 +254,11 @@ app.get("/:service/:payment_hash/check_payment", async (req, res) => {
 
 // --------------------- SERVICES -----------------------------
 
-function usd_to_millisats(servicePriceUSD,bitcoinPrice){
-  const profitMarginFactor = (1.0 + (process.env.PROFIT_MARGIN_PCT/100.0));
-  return Math.round((servicePriceUSD * 100000000000 * profitMarginFactor) / bitcoinPrice);
+function usd_to_millisats(servicePriceUSD, bitcoinPrice) {
+  const profitMarginFactor = 1.0 + process.env.PROFIT_MARGIN_PCT / 100.0;
+  const rawValue = (servicePriceUSD * 100000000000 * profitMarginFactor) / bitcoinPrice;
+  const roundedValue = Math.round(rawValue / 1000) * 1000; // Round to the nearest multiple of 1000
+  return roundedValue;
 }
 
 async function getServicePrice(service) {

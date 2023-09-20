@@ -249,7 +249,7 @@ async function main() {
 
   // --------------------- Call Endpoints -----------------------------
   //Ex 1: Simple GPT Examples:
-  const runs = 3;
+  const runs = 1;
   const gptRuns = [];
   for (let i = 0; i < runs; i++) {
     gptRuns.push(runGPT(relay, i, `Tell me a joke about the number ${i}`));
