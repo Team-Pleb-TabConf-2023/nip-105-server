@@ -5,6 +5,7 @@ const app = express();
 const axios = require("axios");
 const bolt11 = require("bolt11");
 const bodyParser = require("body-parser");
+const { getBitcoinPrice } = require('./lib/bitcoinPrice');
 const {
   relayInit,
   getPublicKey,
@@ -125,7 +126,7 @@ async function getPaymentHash(invoice) {
 }
 
 async function generateInvoice(service) {
-  const msats = getServicePrice(service);
+  const msats = await getServicePrice(service);
   const lnurlResponse = await axios.get(getLNURL(), {
     headers: {
       Accept: "application/json",
@@ -161,7 +162,7 @@ async function generateInvoice(service) {
 function getSuccessAction(service, paymentHash) {
   return {
     tag: "url",
-    url: `http://localhost:3000/${service}/${paymentHash}/get_result`,
+    url: `${process.env.ENDPOINT}/${service}/${paymentHash}/get_result`,
     description: "Open to get the confirmation code for your purchase.",
   };
 }
@@ -253,12 +254,21 @@ app.get("/:service/:payment_hash/check_payment", async (req, res) => {
 
 // --------------------- SERVICES -----------------------------
 
-function getServicePrice(service) {
+function usd_to_millisats(servicePriceUSD, bitcoinPrice) {
+  const profitMarginFactor = 1.0 + process.env.PROFIT_MARGIN_PCT / 100.0;
+  const rawValue = (servicePriceUSD * 100000000000 * profitMarginFactor) / bitcoinPrice;
+  const roundedValue = Math.round(rawValue / 1000) * 1000; // Round to the nearest multiple of 1000
+  return roundedValue;
+}
+
+async function getServicePrice(service) {
+  const bitcoinPrice = await getBitcoinPrice(); 
+  
   switch (service) {
     case "GPT":
-      return process.env.GPT_MSATS;
+      return usd_to_millisats(process.env.GPT_USD,bitcoinPrice);
     case "STABLE":
-      return process.env.STABLE_DIFFUSION_MSATS;
+      return usd_to_millisats(process.env.STABLE_DIFFUSION_USD,bitcoinPrice);
     default:
       return process.env.GPT_MSATS;
   }
@@ -379,11 +389,13 @@ async function postOfferings() {
   });
   await relay.connect();
 
+  const gptPrice = await getServicePrice("GPT")
+
   const gptOffering = createOfferingNote(
     pk,
     sk,
     "https://api.openai.com/v1/chat/completions",
-    Number(process.env.GPT_MSATS),
+    Number(gptPrice),
     process.env.ENDPOINT + "/" + "GPT",
     "UP",
     GPT_SCHEMA,
@@ -394,11 +406,12 @@ async function postOfferings() {
   await relay.publish(gptOffering);
   console.log(`Published GPT Offering: ${gptOffering.id}`);
 
+  const stablePrice = await getServicePrice("STABLE")
   const sdOffering = createOfferingNote(
     pk,
     sk,
     "https://stablediffusionapi.com/api/v4/dreambooth",
-    Number(process.env.STABLE_DIFFUSION_MSATS),
+    Number(stablePrice),
     process.env.ENDPOINT + "/" + "STABLE",
     "UP",
     STABLE_DIFFUSION_SCHEMA,
@@ -413,6 +426,8 @@ async function postOfferings() {
 }
 
 postOfferings();
+setInterval(postOfferings, 300000);
+
 
 // --------------------- SERVER -----------------------------
 
@@ -421,7 +436,7 @@ if (port == null || port == "") {
   port = 3000;
 }
 
-app.listen(port, function () {
-  console.log("Starting NST Backend...");
+app.listen(port, async function () {
+  console.log("Starting NIP105 Server...");
   console.log(`Server started on port ${port}.`);
 });
