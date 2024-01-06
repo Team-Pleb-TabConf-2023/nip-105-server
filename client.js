@@ -273,7 +273,7 @@ async function main() {
   
   //Ex 3: Chained Requests from disparate services:
   // Call runGPT to get a GPT response
-  const countries = ["Japan","Sweden"];//["Japan", "Madagascar", "Sweden", "Austrailia", "Brazil"];
+  const countries = ["Japan", "Madagascar", "Sweden", "Austrailia", "Brazil"];
 
   for (let i = 0; i < countries.length; i++) {
     const country = countries[i];

@@ -1,11 +1,11 @@
 const WebSocket = require("ws");
 const express = require("express");
 const cors = require('cors');
-const app = express();
 const axios = require("axios");
 const bolt11 = require("bolt11");
 const bodyParser = require("body-parser");
 const { getBitcoinPrice } = require('./lib/bitcoinPrice');
+const crypto = require('crypto');
 const {
   relayInit,
   getPublicKey,
@@ -23,6 +23,8 @@ const { sleep } = require("./lib/helpers");
 
 require("dotenv").config();
 global.WebSocket = WebSocket;
+
+const app = express();
 
 const mongoose = require("mongoose");
 
@@ -67,6 +69,18 @@ function getLNURL() {
   const username = parts[0];
   const domain = parts[1];
   return `https://${domain}/.well-known/lnurlp/${username}`;
+}
+
+// Function to return the SHA256 hash of a given string
+function sha256Hash(obj) {
+  // Create a SHA256 hash
+  const hash = crypto.createHash('sha256');
+
+  // Update the hash with the string
+  hash.update(JSON.stringify(obj));
+
+  // Return the hash digest in hexadecimal format
+  return hash.digest('hex');
 }
 
 async function createNewJobDocument(service, invoice, paymentHash, price) {
@@ -280,9 +294,15 @@ function submitService(service, data) {
       return callChatGPT(data);
     case "STABLE":
       return callStableDiffusion(data);
+    case "YTDL":
+      return callYitter(data);
     default:
       return callChatGPT(data);
   }
+}
+
+async function callYitter(data){
+  
 }
 
 async function callChatGPT(data) {
@@ -350,6 +370,13 @@ function createOfferingNote(
 ) {
   const now = Math.floor(Date.now() / 1000);
 
+  console.log(typeof(outputSchema))
+  const outputHash = sha256Hash(outputSchema);
+  console.log(`outputHash:${outputHash}`)
+
+  const inputHash = sha256Hash(inputSchema);
+  console.log(`inputHash:${inputHash}`)
+
   const content = {
     endpoint, // string
     status, // UP/DOWN/CLOSED
@@ -357,6 +384,8 @@ function createOfferingNote(
     inputSchema, // Json Schema
     outputSchema, // Json Schema
     description, // string / NULL
+    inputHash,
+    outputHash
   };
 
   let offeringEvent = {
@@ -433,7 +462,7 @@ setInterval(postOfferings, 300000);
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 3000;
+  port = 6969;
 }
 
 app.listen(port, async function () {
