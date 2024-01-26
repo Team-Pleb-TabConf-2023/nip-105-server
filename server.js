@@ -117,6 +117,9 @@ async function getIsInvoicePaid(paymentHash) {
     return { isPaid: true, invoice };
   }
 
+  console.log(`calling verifyURL:${doc.verifyURL}`)
+  console.log("doc:",doc)
+
   const response = await axios.get(doc.verifyURL, {
     headers: {
       Accept: "application/json",
@@ -207,10 +210,11 @@ app.post("/:service", async (req, res) => {
 });
 
 app.get("/:service/:payment_hash/get_result", async (req, res) => {
-  try {
     const service = req.params.service;
     const paymentHash = req.params.payment_hash;
+    console.log(`GET request sent to:/${service}/${paymentHash}/get_result`)
     const { isPaid, invoice } = await getIsInvoicePaid(paymentHash);
+    console.log(`{ isPaid, invoice }: { ${isPaid}, ${invoice} }`)
 
     logState(service, paymentHash, "POLL");
     if (isPaid != true) {
@@ -231,6 +235,7 @@ app.get("/:service/:payment_hash/get_result", async (req, res) => {
         default:
           logState(service, paymentHash, "PAID");
           const data = doc.requestData;
+          console.log(`Calling submitService ${service}, ${data}`)
           submitService(service, data)
             .then(async (response) => {
               doc.requestResponse = response;
@@ -317,7 +322,9 @@ async function callChatGPT(data) {
   };
 
   try {
+    console.log("doing axios request:",config)
     const response = await axios(config);
+    console.log("response:",response)
     return response.data;
   } catch (e) {
     console.log(`ERROR: ${e.toString().substring(0, 50)}`);
