@@ -109,26 +109,33 @@ async function findJobRequestByPaymentHash(paymentHash) {
 }
 
 async function getIsInvoicePaid(paymentHash) {
-  const doc = await findJobRequestByPaymentHash(paymentHash);
-
-  const invoice = doc.invoice;
-
-  if (doc.status == "PAID") {
-    return { isPaid: true, invoice };
+  try{
+    const doc = await findJobRequestByPaymentHash(paymentHash);
+  
+    const invoice = doc.invoice;
+  
+    if (doc.status == "PAID") {
+      return { isPaid: true, invoice };
+    }
+  
+    const response = await axios.get(doc.verifyURL, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+  
+    const isPaid = response.data.settled == true;
+  
+    doc.status = isPaid ? "PAID" : doc.status;
+    await doc.save();
+  
+    return { isPaid, invoice };
   }
-
-  const response = await axios.get(doc.verifyURL, {
-    headers: {
-      Accept: "application/json",
-    },
-  });
-
-  const isPaid = response.data.settled == true;
-
-  doc.status = isPaid ? "PAID" : doc.status;
-  await doc.save();
-
-  return { isPaid, invoice };
+  catch(error){
+    console.log("getInvoiceIsPaidError");
+    logAxiosError(error);
+    throw error;
+  }
 }
 
 async function getPaymentHash(invoice) {
@@ -140,37 +147,100 @@ async function getPaymentHash(invoice) {
 }
 
 async function generateInvoice(service) {
+  try{
   const msats = await getServicePrice(service);
   const lnurlResponse = await axios.get(getLNURL(), {
     headers: {
       Accept: "application/json",
-    },
-  });
-
-  const lnAddress = lnurlResponse.data;
-
-  if (msats > lnAddress.maxSendable || msats < lnAddress.minSendable) {
-    throw new Error(
-      `${msats} msats not in sendable range of ${lnAddress.minSendable} - ${lnAddress.maxSendable}`
-    );
+    },    const doc = await findJobRequestByPaymentHash(paymentHash);
+  
+    const invoice = doc.invoice;
+  
+    if (doc.status == "PAID") {
+      return { isPaid: true, invoice };
+    }
+  
+    const response = await axios.get(doc.verifyURL, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+  
+    const isPaid = response.data.settled == true;
+  
+    doc.status = isPaid ? "PAID" : doc.status;
+    await doc.save();
+  
+    return { isPaid, invoice };
   }
+  catch(error){
+    console.log("getInvoiceIsPaidError");
+    logAxiosError(error);
+    throw error;
+  }
+}
 
-  const expiration = new Date(Date.now() + 3600 * 1000); // One hour from now
-  const url = `${lnAddress.callback}?amount=${msats}&expiry=${Math.floor(
-    expiration.getTime() / 1000
-  )}`;
+async function getPaymentHash(invoice) {
+  const decodedInvoice = await bolt11.decode(invoice);
+  const paymentHashTag = decodedInvoice.tags.find(
+    (tag) => tag.tagName === "payment_hash"
+  ).data;
+  return paymentHashTag;
+}
 
-  const invoiceResponse = await axios.get(url);
-  const invoiceData = invoiceResponse.data;
-
-  const paymentHash = await getPaymentHash(invoiceData.pr);
-  const successAction = getSuccessAction(service, paymentHash);
-
-  const invoice = { ...invoiceData, successAction, paymentHash };
-
-  await createNewJobDocument(service, invoice, paymentHash, msats);
-
-  return invoice;
+async function generateInvoice(service) {
+  try{
+    const msats = await getServicePrice(service);
+    const lnurlResponse = await axios.get(getLNURL(), {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+  
+    const lnAddress = lnurlResponse.data;
+  
+    if (msats > lnAddress.maxSendable || msats < lnAddress.minSendable) {
+      throw new Error(
+        `${msats} msats not in sendable range of ${lnAddress.minSendable} - ${lnAddress.maxSendable}`
+      );
+    }
+  
+    const expiration = new Date(Date.now() + 3600 * 1000); // One hour from now
+    const url = `${lnAddress.callback}?amount=${msats}&expiry=${Math.floor(
+      expiration.getTime() / 1000
+    return invoice;
+    });
+  
+    const lnAddress = lnurlResponse.data;
+  
+    if (msats > lnAddress.maxSendable || msats < lnAddress.minSendable) {
+      throw new Error(
+        `${msats} msats not in sendable range of ${lnAddress.minSendable} - ${lnAddress.maxSendable}`
+      );
+    }
+  
+    const expiration = new Date(Date.now() + 3600 * 1000); // One hour from now
+    const url = `${lnAddress.callback}?amount=${msats}&expiry=${Math.floor(
+      expiration.getTime() / 1000
+    )}`;
+  
+    const invoiceResponse = await axios.get(url);
+    const invoiceData = invoiceResponse.data;
+  
+    const paymentHash = await getPaymentHash(invoiceData.pr);
+    const successAction = getSuccessAction(service, paymentHash);
+  
+    const invoice = { ...invoiceData, successAction, paymentHash };
+  
+    await createNewJobDocument(service, invoice, paymentHash, msats);
+  
+    return invoice;
+  }
+  catch(error){
+    console.log("getInvoiceIsPaidError");
+    logAxiosError(error);
+    throw error;
+  }
 }
 
 function getSuccessAction(service, paymentHash) {
@@ -180,6 +250,24 @@ function getSuccessAction(service, paymentHash) {
     description: "Open to get the confirmation code for your purchase.",
   };
 }
+
+function logAxiosError(error) {
+  if (error.response) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    console.log("Axios Error Response Data:", error.response.data);
+    console.log("Axios Error Response Status:", error.response.status);
+    console.log("Axios Error Response Headers:", error.response.headers);
+  } else if (error.request) {
+    // The request was made but no response was received
+    console.log("Axios Error Request:", error.request);
+  } else {
+    // Something happened in setting up the request that triggered an Error
+    console.log("Axios Error Message:", error.message);
+  }
+  console.log("Axios Error Config:", error.config);
+}
+
 
 // --------------------- ENDPOINTS -----------------------------
 
