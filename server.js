@@ -189,6 +189,8 @@ app.use(bodyParser.json());
 
 app.post("/:service", async (req, res) => {
   try {
+    console.log("Rendering service:", req.params.service);
+    console.log("full req:",req)
     const service = req.params.service;
     const invoice = await generateInvoice(service);
     const doc = await findJobRequestByPaymentHash(invoice.paymentHash);
@@ -201,6 +203,7 @@ app.post("/:service", async (req, res) => {
 
     res.status(402).send(invoice);
   } catch (e) {
+    console.log("Error rendering service invoice:")
     console.log(e.toString().substring(0, 150));
     res.status(500).send(e);
   }
